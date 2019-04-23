@@ -4,7 +4,7 @@ import * as watch from 'react-native-watch-connectivity';
 import { appNavigate } from '../../app';
 
 import { APP_WILL_MOUNT } from '../../base/app';
-import { getInviteURL } from '../../base/connection';
+import { getInviteURL, isInviteURLReady } from '../../base/connection';
 import { setAudioMuted } from '../../base/media';
 import {
     MiddlewareRegistry,
@@ -122,21 +122,11 @@ function _appWillMount({ dispatch, getState }) {
  */
 function _getCurrentConferenceUrl(stateful) {
     const state = toState(stateful);
-    const { locationURL } = state['features/base/config'];
     let currentUrl;
 
-    if (locationURL) {
-        currentUrl = toURLString(locationURL);
+    if (isInviteURLReady(state)) {
+        currentUrl = toURLString(getInviteURL(state));
     }
-
-    if (!currentUrl) {
-        const inviteUrl = getInviteURL(state);
-
-        currentUrl = toURLString(inviteUrl);
-    }
-
-    // NOTE is there no reliable way in the app to figure out what's the current
-    // conference (including the load config phase) ?
 
     // Check if the URL doesn't end with a slash
     if (currentUrl && currentUrl.substr(-1) === '/') {
